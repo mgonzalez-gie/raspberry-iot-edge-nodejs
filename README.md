@@ -118,19 +118,71 @@ sudo apt-get install iotedge
 
 ## Crear un dispositivo edge en el Hub
 
-Ingresar al IoT Hub *tracking-gie* a travez del portal Azure. Seleccionar IoT Edge en la barra lateral y la opcion paraagregar un nuevo dispositivo.
+Ingresar al IoT Hub *tracking-gie* a través del [portal Azure](https://portal.azure.com/). Seleccionar IoT Edge en la barra lateral y la opción paraagregar un nuevo dispositivo.
 <p align="center">
     <img src="./doc/img005.png" width="600">
 </p>
 
-Asignar un id al dispositivo y guardar.
+Asignar un id al dispositivo, mantener como método de autenticación las claves simétricas autogeneradas y guardar.
 <p align="center">
     <img src="./doc/img006.png" width="600">
 </p>
 
-Ingresar al dispositivo recien creado y tomar nota de la cadena de conexión
+Ingresar al dispositivo recién creado y tomar nota de la cadena de conexión
 <p align="center">
     <img src="./doc/img007.png" width="600">
 </p>
 
+## Aprovisionar el dispositivo IoT Edge
+
+### Configuración
+
+Ingresar por ssh a la raspberry y editar el archivo *config.yaml* mediante
+```
+sudo nano /etc/iotedge/config.yaml
+```
+
+Identificar la entrada de la configuración para aprovisionamiento manual y agregar la cadena de conexión copiada del dispositivo en el IoT Hub.
+
+```
+# Manual provisioning configuration using a connection string
+provisioning:
+  source: "manual"
+  device_connection_string: "<ADD DEVICE CONNECTION STRING HERE>"
+  dynamic_reprovisioning: false
+```
+Guardar y cerrar el archivo con CTRL + X, Y, Enter
+
+Reiniciar el servicio iotedge
+```
+sudo systemctl restart iotedge
+```
+
+### Verificaciones
+
+Verificar el estado del servicio
+```
+sudo systemctl status iotedge
+```
+<p align="center">
+    <img src="./doc/img008.png" width="700">
+</p>
+
+Realizar un chequeo
+```
+sudo iotedge check
+```
+<p align="center">
+    <img src="./doc/img009.png" width="700">
+</p>
+
+Se obtendrán algunos warnings respecto a configuraciones que deben realizarse para desplegar el dispositivo en producción y un error respecto al módulo IoT Hub. Este módulo recién es instalado en el dispositivo cuando se crea un módulo custom.
+
+Finalmente, listar los módulos que se encuentran corriendo
+```
+sudo iotedge list
+```
+<p align="center">
+    <img src="./doc/img010.png" width="700">
+</p>
 
