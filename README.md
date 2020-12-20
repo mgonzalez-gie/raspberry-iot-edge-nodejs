@@ -176,7 +176,7 @@ sudo iotedge check
     <img src="./doc/img009.png" width="700">
 </p>
 
-Se obtendrán algunos warnings respecto a configuraciones que deben realizarse para desplegar el dispositivo en producción y un error respecto al módulo IoT Hub. Este módulo recién es instalado en el dispositivo cuando se crea un módulo custom.
+Se obtendrán algunos warnings respecto a configuraciones que deben realizarse para desplegar el dispositivo en producción y un error respecto al módulo edgeHub. Este módulo recién es instalado en el dispositivo cuando se configura un deploy.
 
 Finalmente, listar los módulos que se encuentran corriendo
 ```
@@ -186,3 +186,61 @@ sudo iotedge list
     <img src="./doc/img010.png" width="700">
 </p>
 
+En el IoT Hub veremos en el detalle del dispositivo que el módulo edgeAgent ya se encuentra corriendo.
+<p align="center">
+    <img src="./doc/img011.png" width="700">
+</p>
+
+## Desarrollar un módulo IoT Edge con Node.js
+
+### Prerrequisitos
+
+**Instalar [Node.js y npm](https://nodejs.org/en/)**
+
+En Visual Studio Code abrir un terminal y verificar la instalación checkeando las versiones instaladas
+```
+PS D:\repositorios-gie> node --version
+v14.15.3
+PS D:\repositorios-gie> npm --version
+6.14.8
+```
+
+**Instalar [Docker Desktop](https://www.docker.com/products/docker-desktop)**
+
+Para Windows 10 Pro, Enterprise, and Education los requerimientos e instrucciones para instalación se pueden encontrar [acá](https://docs.docker.com/docker-for-windows/install/). Para Windows 10 Home los requerimientos e instrucciones para instalación se pueden encontrar [acá](https://docs.docker.com/docker-for-windows/install-windows-home/).
+
+**Instalar al extensión *Azure IoT Tools* en Visual Studio Code**
+<p align="center">
+    <img src="./doc/img012.png" width="700">
+</p>
+
+**Instalar al extensión *Docker* en Visual Studio Code**
+<p align="center">
+    <img src="./doc/img013.png" width="700">
+</p>
+
+
+### Crear un nuevo proyecto
+
+En una terminal de Visaul Studio instalar *yeoman* y el generador para Node.js Azure IoT Edge module
+
+```
+npm install -g yo generator-azure-iot-edge-module
+```
+
+Si todo va bien, al finalizar se debe tener el siguiente resultado
+
+```
+Yeoman Doctor
+Running sanity checks on your system
+
+√ No .bowerrc file in home directory
+√ Global configuration file is valid
+√ NODE_PATH matches the npm root
+√ No .yo-rc.json file in home directory
+√ Node.js version
+√ npm version
+√ yo version
+
+Everything looks all right!
+```
