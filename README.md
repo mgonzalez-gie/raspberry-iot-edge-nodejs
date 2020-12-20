@@ -73,3 +73,64 @@ Instalar la configuración de repositorios
 ```
 curl https://packages.microsoft.com/config/debian/stretch/multiarch/prod.list > ./microsoft-prod.list
 ```
+
+Copiar lla lista generada al directorio sources.list.d
+
+```
+sudo cp ./microsoft-prod.list /etc/apt/sources.list.d/
+```
+
+Instalar la clave publica GPG de Microsoft
+
+```
+curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+sudo cp ./microsoft.gpg /etc/apt/trusted.gpg.d/
+```
+
+### Instalar el engine Moby
+
+Actualizar las listas de paquetes
+```
+sudo apt-get update
+```
+
+Instalar el engine Moby
+```
+sudo apt-get install moby-engine
+```
+
+### Instalar el runtime Azure IoT Edge
+
+Actualizar las listas de paquetes
+```
+sudo apt-get update
+```
+
+Instalar OpenSSL versión 1.0.2 (Requerido para Buster)
+```
+sudo apt-get install libssl1.0.2
+```
+
+Instalar IoT Edge
+```
+sudo apt-get install iotedge
+```
+
+## Crear un dispositivo edge en el Hub
+
+Ingresar al IoT Hub *tracking-gie* a travez del portal Azure. Seleccionar IoT Edge en la barra lateral y la opcion paraagregar un nuevo dispositivo.
+<p align="center">
+    <img src="./doc/img005.png" width="600">
+</p>
+
+Asignar un id al dispositivo y guardar.
+<p align="center">
+    <img src="./doc/img006.png" width="600">
+</p>
+
+Ingresar al dispositivo recien creado y tomar nota de la cadena de conexión
+<p align="center">
+    <img src="./doc/img007.png" width="600">
+</p>
+
+
