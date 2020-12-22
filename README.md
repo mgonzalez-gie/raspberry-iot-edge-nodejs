@@ -244,3 +244,112 @@ Running sanity checks on your system
 
 Everything looks all right!
 ```
+Abrir *View* > *Command Palette* 
+
+Escribir *Azure: Sign in* y seguir las instrucciones para loggearse an Azure con la cuenta de Gie.
+
+Abrir nuevamente la paleta de comandos e ingresar *Azure IoT Edge: New IoT Edge solution* e ir completando:
+
+| Campo | Valor |
+| --- | --- |
+| Select folder | Elegir la carpeta donde crear la solución |
+| Provide a solution name | Ingresar un nombre para la solución |
+| Select module template | Elegir *Node.js* |
+| Provide a module name | Ingresar un nombre para el modulo custom |
+| Provide Docker image repository for the module | Ingresar el repositorio giegroup/*nombreModulo* |
+
+Luego se creara la solución con el template de un módulo.
+<p align="center">
+    <img src="./doc/img014.png" width="300">
+</p>
+
+### Agregar las credenciales del repositorio en Docker Hub
+
+En caso de no contar con una cuenta en [Docker Hub](https://hub.docker.com/), se debe crear una y debe ser agregada a la organzación giegroup para poder crear ahi el repositorio.
+
+Los datos de login deben ser agregados al archivo *.env* de la solucion
+<p align="center">
+    <img src="./doc/img015.png" width="700">
+</p>
+
+### Seleccionar la arquitectura a complilar
+
+Para raspberry se debe seleccionar arm32v7
+<p align="center">
+    <img src="./doc/img016.png" width="700">
+</p>
+
+### Complilar y cargar al repositorio
+
+Logearse en Docker mediante el siguiente comando en una terminal
+```
+docker login -u "usuario" -p "password" docker.io
+```
+En el explorador de VS Code, hacer click derecho sobre *deployment.template.json* y seleccionar *Build and Push IoT Edge Solution*.
+<p align="center">
+    <img src="./doc/img017.png" width="700">
+</p>
+
+El comando build and push inicia tres operaciones:
+* Primero, crea una nueva carpeta en la solución llamada *config* que contiene el manifiesto de implementación completo, construido a partir de la información de la plantilla de implementación y otros archivos de la solución. 
+* En segundo lugar, ejecuta el comando *docker build* para generar la imagen del contenedor en función del archivo *dockerfile* correspondiente a la arquitectura de destino. 
+* Luego, ejecuta *docker push* para enviar la imagen al registro de contenedores.
+
+Podemos ver la imagen del módulo custom cargada en Docker Hub
+<p align="center">
+    <img src="./doc/img018.png" width="700">
+</p>
+
+### Instalar el módulo e el dispositivo
+
+En el explorador de VS Code, en la seccion Azure IoT Hub, expandir la lista de Devices para ver la raspberry. Hacer click derecho en el dispositivo y seleccionar *Create Deployment for Single Device*.
+<p align="center">
+    <img src="./doc/img019.png" width="700">
+</p>
+
+En la carpeta config seleccionar el archivo *deployment.arm32v7.json*
+<p align="center">
+    <img src="./doc/img020.png" width="700">
+</p>
+
+En esta operación el archivo de *deployment* se cargará en el dispositivo en el IoT Hub y este se encargará de descargar los módulos indicados en la raspberry de forma automática. Pasado unos minutos, se indicarán en el explorador los módulos corriendo en el dispositivo (Ademas del edgeAgent que ya estaba funcionando, se agregan el edgeHub, el módulo desarrollado y el módulo SimulatedTemperatureSensor parte del template).
+<p align="center">
+    <img src="./doc/img021.png" width="700">
+</p>
+
+En esta aplicación demo, se instala un módulo del template que simua un sensor de temperatura. Este módulo transmite los mensages al modulo custom desarrollado. El módulo desarrollado revibe estos mensajes y directamente los reenvia al módulo edgeHub para que este finalmente los envie al IoT Hub en la nube.
+
+Ingresando por ssh a la raspberry podemos ver los modulos corriendo
+<p align="center">
+    <img src="./doc/img022.png" width="700">
+</p>
+
+Es posible conectar a los contenedores docker para ver los mensajes
+<p align="center">
+    <img src="./doc/img023.png" width="700">
+</p>
+<p align="center">
+    <img src="./doc/img024.png" width="700">
+</p>
+
+La herramienta [Azure IoT Explorer](https://github.com/Azure/azure-iot-explorer/releases) permite, entre otras cosas, conectar al endpoint del IoT Hub y visualizar los mensajes de telemetria recibidos en la nube desde cada dispositivo.
+
+Para conectar el IoT Explorer al IoT Hub primero se debe obtener su cadena de conexion desde el portal de Azure
+<p align="center">
+    <img src="./doc/img025.png" width="700">
+</p>
+
+Luego se debe configurar la conexion en el explorer
+<p align="center">
+    <img src="./doc/img026.png" width="700">
+</p>
+
+Seleccionar el dispositivo
+<p align="center">
+    <img src="./doc/img027.png" width="700">
+</p>
+
+Iniciar la recepción de los mensajes de telemetria
+<p align="center">
+    <img src="./doc/img028.png" width="700">
+</p>
