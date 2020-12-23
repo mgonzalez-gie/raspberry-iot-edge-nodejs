@@ -370,3 +370,40 @@ Recompliar y hacer un nuevo deploy a la raspberry. Puede verse como el módulo d
 <p align="center">
     <img src="./doc/img031.png" width="700">
 </p>
+
+## Transmitir mensajes de telemetria desde el módulo custom
+
+Definir los datos a transmitir
+
+```
+var TelemetryData = {
+  DateTime: null,
+  Latitude: "-34.562834",
+  Longitude: "-58.704889",
+  Beacons: []
+};
+```
+
+Agregar un intervalo que llame a la funcion SendMessage en client.open()
+
+```
+// Transmite mensaje de telemetria cada 30 segundos
+setInterval(function() { sendMessage(client); }, 30000);
+```
+
+Implementar la funcion SendMessage para enviar los datos agregandole la propiedad "Platform":"Raspberry".
+
+```
+// Envia mensajes de telemetria
+function sendMessage(client) {
+  TelemetryData.DateTime = new Date(Date.now());
+  var outputMsg = new Message(JSON.stringify(TelemetryData));
+  outputMsg.properties.add('Platform', 'Raspberry');
+  client.sendOutputEvent('output1', outputMsg, printResultFor('Sending telemetry message'));
+  console.log(TelemetryData);
+}
+```
+Recompliar y hacer un nuevo deploy a la raspberry. Verificar la recepción de los datos en el IoT Explorer
+<p align="center">
+    <img src="./doc/img032.png" width="600">
+</p>

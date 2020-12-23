@@ -26,7 +26,7 @@ Client.fromEnvironment(Transport, function (err, client) {
       } else {
         console.log('IoT Hub module client initialized');
 
-        // Transmite mensaje de telemetria cada 1 minuto
+        // Transmite mensaje de telemetria cada 30 segundos
         setInterval(function() { sendMessage(client); }, 30000);
 
         // Act on input messages to the module.
@@ -42,6 +42,7 @@ Client.fromEnvironment(Transport, function (err, client) {
 function sendMessage(client) {
   TelemetryData.DateTime = new Date(Date.now());
   var outputMsg = new Message(JSON.stringify(TelemetryData));
+  outputMsg.properties.add('Platform', 'Raspberry');
   client.sendOutputEvent('output1', outputMsg, printResultFor('Sending telemetry message'));
   console.log(TelemetryData);
 }
