@@ -353,3 +353,20 @@ Iniciar la recepción de los mensajes de telemetria
 <p align="center">
     <img src="./doc/img028.png" width="700">
 </p>
+
+## Eliminar el módulo SmulatedTemperatureSensor
+
+Eliminar la referencia a la carga del módulo en los archivos *deployment.template.json* y *deployment.debug.template.json*
+<p align="center">
+    <img src="./doc/img029.png" width="700">
+</p>
+
+En los mismos archivos, eliminar la ruta de los mensajes salientes del módulo simulador al modulo Tracking
+<p align="center">
+    <img src="./doc/img030.png" width="700">
+</p>
+
+Recompliar y hacer un nuevo deploy a la raspberry. Puede verse como el módulo del simulador desaparece de la lista de módulos que se esta ejecutando en el dispositivo
+<p align="center">
+    <img src="./doc/img031.png" width="700">
+</p>

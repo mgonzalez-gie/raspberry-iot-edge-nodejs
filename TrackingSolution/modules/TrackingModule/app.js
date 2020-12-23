@@ -4,6 +4,13 @@ var Transport = require('azure-iot-device-mqtt').Mqtt;
 var Client = require('azure-iot-device').ModuleClient;
 var Message = require('azure-iot-device').Message;
 
+var TelemetryData = {
+  DateTime: null,
+  Latitude: "-34.562834",
+  Longitude: "-58.704889",
+  Beacons: []
+};
+
 Client.fromEnvironment(Transport, function (err, client) {
   if (err) {
     throw err;
@@ -19,6 +26,9 @@ Client.fromEnvironment(Transport, function (err, client) {
       } else {
         console.log('IoT Hub module client initialized');
 
+        // Transmite mensaje de telemetria cada 1 minuto
+        setInterval(function() { sendMessage(client); }, 30000);
+
         // Act on input messages to the module.
         client.on('inputMessage', function (inputName, msg) {
           pipeMessage(client, inputName, msg);
@@ -27,6 +37,14 @@ Client.fromEnvironment(Transport, function (err, client) {
     });
   }
 });
+
+// Envia mensajes de telemetria
+function sendMessage(client) {
+  TelemetryData.DateTime = new Date(Date.now());
+  var outputMsg = new Message(JSON.stringify(TelemetryData));
+  client.sendOutputEvent('output1', outputMsg, printResultFor('Sending telemetry message'));
+  console.log(TelemetryData);
+}
 
 // This function just pipes the messages without any change.
 function pipeMessage(client, inputName, msg) {
