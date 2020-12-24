@@ -384,7 +384,7 @@ var TelemetryData = {
 };
 ```
 
-Agregar un intervalo que llame a la funcion SendMessage en client.open()
+Agregar un intervalo que llame a la funcion SendMessage en el callback de client.open()
 
 ```
 // Transmite mensaje de telemetria cada 30 segundos
@@ -407,3 +407,87 @@ Recompliar y hacer un nuevo deploy a la raspberry. Verificar la recepción de lo
 <p align="center">
     <img src="./doc/img032.png" width="600">
 </p>
+
+## Manejar propiedades deseadas y reportadas
+
+Crear el objeto para guardar las propiedades y el identificador del timer 
+
+```
+var Properties = {
+  TelemetryPeriod : 0,
+  FixedCoordinates : {
+    Latitude : 0,
+    Longitude : 0
+  }
+}
+
+var sendMessageIntervalId;
+```
+
+Agregar el codigo para manejar eñ evento de cambios de las propiedades deseadas en el callback de client.open()
+
+```
+// Obtiene el gemelo
+client.getTwin(function(err, twin) {
+    if (err) {
+        console.error('Could not get twin');
+    } else {
+        console.log('Twin created');
+
+    // Cambio Propiedades deseadas TelemetryPeriod (en segundos)
+    twin.on('properties.desired', function(delta) {
+        console.log('Propiedades deseadas recibidas');
+        if(delta.TelemetryPeriod) {
+            if(sendMessageIntervalId) // Detiene el timer si se esta ejecutando
+                clearInterval(sendMessageIntervalId);
+                // TODO: Validar el TelemetryPeriod recibido 
+                Properties.TelemetryPeriod = twin.properties.desired.TelemetryPeriod;
+                console.log('TelemetryPeriod = ' + Properties.TelemetryPeriod);
+                // Arranca el timer de envio de mensajes
+                sendMessageIntervalId = setInterval(function() { sendMessage(client); }, Properties.TelemetryPeriod * 1000);
+            }
+            if(delta.FixedCoordinates) {
+                if(delta.FixedCoordinates.Latitude) 
+                    Properties.FixedCoordinates.Latitude = twin.properties.desired.FixedCoordinates.Latitude;
+                if(delta.FixedCoordinates.Longitude) 
+                    Properties.FixedCoordinates.Longitude = twin.properties.desired.FixedCoordinates.Longitude;
+                console.log('FixedCoordinates = ' + Properties.FixedCoordinates.Latitude + '° / ' + Properties.FixedCoordinates.Longitude + '°');
+            }
+            twin.properties.reported.update(Properties, function(err) {
+                if (err) throw err;
+                console.log('Propiedades reportadas enviadas');
+            });
+        });
+
+    }
+});
+```
+
+El valor del las propiedades deseadas del gemelo puede inicializarse en el archivo *deployment.template.json* a continuación de la inicializacion del modulo $edgeHub
+
+```
+"TrackingModule": {
+    "properties.desired" : {
+        "TelemetryPeriod" : 5,
+        "FixedCoordinates" : {
+            "Latitude" : -34.563007,
+            "Longitude" : -58.704930
+        }
+    }
+}
+```
+Recompliar y hacer un nuevo deploy a la raspberry. Puedeverse que al iniciar el modulo, recibe las propiedades deseadas del IoT Hub.
+<p align="center">
+    <img src="./doc/img033.png" width="400">
+</p>
+
+La propiedades deseadas pueden editarse desde el portal de Azure o bien desde el mismo VS Code
+<p align="center">
+    <img src="./doc/img034.png" width="700">
+</p>
+
+Cada cambio generará un evento, actualización y envío de propiedades reportadas. 
+
+## Referencias
+
+Ejemplos código Node.js https://github.com/Azure/azure-iot-sdk-node/tree/master/device/samples

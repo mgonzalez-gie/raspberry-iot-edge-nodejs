@@ -80,6 +80,15 @@
           "timeToLiveSecs": 7200
         }
       }
+    },
+    "TrackingModule": {
+      "properties.desired" : {
+        "TelemetryPeriod" : 5,
+        "FixedCoordinates" : {
+          "Latitude" : -34.563007,
+          "Longitude" : -58.704930
+        }
+      }
     }
   }
 }
