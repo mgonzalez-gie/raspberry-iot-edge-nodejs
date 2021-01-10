@@ -57,13 +57,13 @@
           }
         },
         "modules": {
-          "TrackingModule": {
+          "tracking": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.TrackingModule}",
+              "image": "${MODULES.tracking}",
               "createOptions": {}
             }
           }
@@ -74,19 +74,19 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "TrackingModuleToIoTHub": "FROM /messages/modules/TrackingModule/outputs/* INTO $upstream"
+          "trackingToIoTHub": "FROM /messages/modules/tracking/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
         }
       }
     },
-    "TrackingModule": {
+    "tracking": {
       "properties.desired" : {
-        "TelemetryPeriod" : 5,
-        "FixedCoordinates" : {
-          "Latitude" : -34.563007,
-          "Longitude" : -58.704930
+        "telemetryPeriod" : 5,
+        "fixedCoordinates" : {
+          "latitude" : -34.563007,
+          "longitude" : -58.704930
         }
       }
     }

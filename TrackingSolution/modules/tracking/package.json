@@ -1,5 +1,5 @@
 {
-    "name": "trackingmodule",
+    "name": "tracking",
     "version": "0.0.1",
     "description": "Azure IoT Edge Node.js module sample project",
     "repository": {

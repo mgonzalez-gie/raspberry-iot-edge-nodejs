@@ -6,18 +6,24 @@ var Message = require('azure-iot-device').Message;
 
 var sendMessageIntervalId;
 
-var TelemetryData = {
-  DateTime: null,
-  Latitude: "-34.562834",
-  Longitude: "-58.704889",
-  Beacons: []
+var telemetryData = {
+  timestamp: null,
+  latitude: 0,
+  longitude: 0,
+  beacons: []
 };
 
-var Properties = {
-  TelemetryPeriod : 0,
-  FixedCoordinates : {
-    Latitude : 0,
-    Longitude : 0
+var eventData = {
+  timestamp: null,
+  message: "",
+  data: {}
+};
+
+var properties = {
+  telemetryPeriod : 0,
+  fixedCoordinates : {
+    latitude : 0,
+    longitude : 0
   }
 }
 
@@ -35,7 +41,8 @@ Client.fromEnvironment(Transport, function (err, client) {
         throw err;
       } else {
         console.log('IoT Hub module client initialized');
-
+        // Envia mensaje de inicio
+        sendStartEventMessage(client);
         // Obtiene el gemelo
         client.getTwin(function(err, twin) {
           if (err) {
@@ -46,23 +53,23 @@ Client.fromEnvironment(Transport, function (err, client) {
             // Cambio Propiedades deseadas TelemetryPeriod (en segundos)
             twin.on('properties.desired', function(delta) {
               console.log('Propiedades deseadas recibidas');
-              if(delta.TelemetryPeriod) {
+              if(delta.telemetryPeriod) {
                 if(sendMessageIntervalId) // Detiene el timer si se esta ejecutando
                   clearInterval(sendMessageIntervalId);
                 // TODO: Validar el TelemetryPeriod recibido 
-                Properties.TelemetryPeriod = twin.properties.desired.TelemetryPeriod;
-                console.log('TelemetryPeriod = ' + Properties.TelemetryPeriod);
+                properties.telemetryPeriod = twin.properties.desired.telemetryPeriod;
+                console.log('TelemetryPeriod = ' + properties.telemetryPeriod + ' min.');
                 // Arranca el timer de envio de mensajes
-                sendMessageIntervalId = setInterval(function() { sendMessage(client); }, Properties.TelemetryPeriod * 1000);
+                sendMessageIntervalId = setInterval(function() { sendTelemetryMessage(client); }, properties.telemetryPeriod * 60 * 1000);
               }
-              if(delta.FixedCoordinates) {
-                if(delta.FixedCoordinates.Latitude) 
-                  Properties.FixedCoordinates.Latitude = twin.properties.desired.FixedCoordinates.Latitude;
-                if(delta.FixedCoordinates.Longitude) 
-                  Properties.FixedCoordinates.Longitude = twin.properties.desired.FixedCoordinates.Longitude;
-                console.log('FixedCoordinates = ' + Properties.FixedCoordinates.Latitude + '° / ' + Properties.FixedCoordinates.Longitude + '°');
+              if(delta.fixedCoordinates) {
+                if(delta.fixedCoordinates.latitude) 
+                  properties.fixedCoordinates.latitude = twin.properties.desired.fixedCoordinates.latitude;
+                if(delta.fixedCoordinates.longitude) 
+                  properties.fixedCoordinates.longitude = twin.properties.desired.fixedCoordinates.longitude;
+                console.log('FixedCoordinates = ' + properties.fixedCoordinates.latitude + '° / ' + properties.fixedCoordinates.longitude + '°');
               }
-              twin.properties.reported.update(Properties, function(err) {
+              twin.properties.reported.update(properties, function(err) {
                 if (err) throw err;
                 console.log('Propiedades reportadas enviadas');
               });
@@ -81,14 +88,27 @@ Client.fromEnvironment(Transport, function (err, client) {
 });
 
 // Envia mensajes de telemetria
-function sendMessage(client) {
-  TelemetryData.DateTime = new Date(Date.now());
-  TelemetryData.Latitude = Properties.FixedCoordinates.Latitude;
-  TelemetryData.Longitude = Properties.FixedCoordinates.Longitude;
-  var outputMsg = new Message(JSON.stringify(TelemetryData));
-  outputMsg.properties.add('Platform', 'Raspberry');
+function sendTelemetryMessage(client) {
+  telemetryData.timestamp = new Date(Date.now());
+  telemetryData.latitude = properties.fixedCoordinates.latitude;
+  telemetryData.longitude = properties.fixedCoordinates.longitude;
+  var outputMsg = new Message(JSON.stringify(telemetryData));
+  outputMsg.properties.add('deviceType', 'beacon-gateway');
+  outputMsg.properties.add('messageType', 'data');
   client.sendOutputEvent('output1', outputMsg, printResultFor('Sending telemetry message'));
-  console.log(TelemetryData);
+  console.log(telemetryData);
+}
+
+// Envia mensajes de eventos
+function sendStartEventMessage(client) {
+  eventData.timestamp = new Date(Date.now());
+  eventData.message = "Beacon Gateway iniciado";
+  eventData.data = {};
+  var outputMsg = new Message(JSON.stringify(eventData));
+  outputMsg.properties.add('deviceType', 'beacon-gateway');
+  outputMsg.properties.add('messageType', 'event');
+  client.sendOutputEvent('output1', outputMsg, printResultFor('Sending start event message'));
+  console.log(eventData);
 }
 
 // This function just pipes the messages without any change.
